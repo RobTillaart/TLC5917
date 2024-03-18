@@ -30,7 +30,7 @@ The library is **experimental** and needs testing with Hardware.
 Please share your experiences.
 
 
-(changes of the interface are definitely possible).
+(Changes of the interface are definitely possible).
 
 
 #### Daisy chaining
@@ -111,9 +111,41 @@ a separate **enable()** per device you might need to connect the devices
 The blank parameter in the constructor should be set to -1 (out of range value).
 
 
+#### Configure gain
+
+See datasheet page 23 for details.
+
+- **void setCurrentAdjustMode()**
+- **void setNormalMode()**
+- **void writeConfiguration(uint8_t config)** See page 23 datasheet
+
+|      bit  |  0  |  1  |  2  |  3  |  4  |  5  |  6  |  7  |
+|:---------:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+|  meaning  |  CM |  HC | CC0 | CC1 | CC2 | CC3 | CC4 | CC5 |
+|  default  |  1  |  1  |  1  |  1  |  1  |  1  |  1  |  1  |
+
+CM limits the output current range.  
+- High Current Multiplier (CM = 1): 10 mA to 120 mA.
+- Low Current Multiplier  (CM = 0):  3 mA to  40 mA.
+
+VG (voltage gain) = (1 + HC) × (1 + D/64) / 4
+where  D = CC0 × 32 + CC1 × 16 + CC2 × 8 + CC3 × 4 + CC4 × 2 + CC5
+
+CG (current gain) = VG x pow(3, CM - 1)    
+
+```
+Default 
+CG = VG x 3;  
+VG = 2 x ( 1 + 63/64) / 4 = 127/128
+```
+
+TODO test with hardware to understand this in detail.  
+Actual current depends on Rext (see datasheet).
+
+
 ## Performance
 
-See **TLC5917_performance.ino** for an indication.
+See **TLC5917_performance.ino** for an indicative test.
 
 
 ## Future
@@ -127,6 +159,7 @@ See **TLC5917_performance.ino** for an indication.
 
 #### Should
 
+- get basic functionality running
 - investigate daisy chaining. (hardware needed).
   - max CLOCK speed when chained (50% DutyCycle)
   - what is clock in practice (e.g. an ESP32 240 MHz)
@@ -134,7 +167,6 @@ See **TLC5917_performance.ino** for an indication.
 #### Could
 
 - add examples
-- TLC5916 derived class.
 
 #### Wont
 
