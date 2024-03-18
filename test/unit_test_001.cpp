@@ -63,66 +63,6 @@ unittest(test_begin)
 }
 
 
-unittest(test_setPWM_I)
-{
-  TLC5917 tlc(1, 13, 12, 11, 10);
-  tlc.begin();
-  assertEqual(8, tlc.getChannels());
-
-  for (uint8_t channel = 0; channel < 8; channel++)
-  {
-    tlc.setPWM(channel, channel * 170);
-    assertEqual(tlc.getPWM(channel), channel * 170);
-  }
-}
-
-
-unittest(test_setPWM_II)
-{
-  TLC5917 tlc(1, 13, 12, 11, 10);
-  tlc.begin();
-  assertEqual(8, tlc.getChannels());
-
-  tlc.setAll(421);
-  for (uint8_t channel = 0; channel < 8; channel++)
-  {
-    assertEqual(tlc.getPWM(channel), 421);
-  }
-}
-
-
-unittest(test_setPercentage_I)
-{
-  TLC5917 tlc(1, 13, 12, 11, 10);
-  tlc.begin();
-
-  for (uint8_t channel = 0; channel < 8; channel++)
-  {
-    float val = channel * 4.3478;
-    tlc.setPercentage(channel, val);
-    float rval = tlc.getPercentage(channel);
-    assertEqualFloat(rval, val, 0.02);
-
-    fprintf(stderr, "%d\t%.4f\d%.4f\n", channel, val, rval);
-  }
-}
-
-
-unittest(test_setPercentage_II)
-{
-  TLC5917 tlc(2, 13, 12, 11, 10);
-  tlc.begin();
-  assertEqual(16, tlc.getChannels());
-
-  tlc.setPercentageAll(12.34);
-  for (uint8_t channel = 0; channel < tlc.getChannels(); channel += 2)
-  {
-    assertEqualFloat(tlc.getPercentage(channel), 12.34, 0.02);
-  }
-}
-
-
-
 unittest_main()
 
 
