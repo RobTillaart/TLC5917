@@ -22,8 +22,8 @@ TLC5917::TLC5917(int deviceCount, uint8_t clock, uint8_t data, uint8_t LE, uint8
   _channels = deviceCount * 8;
   _clock    = clock;
   _data     = data;
-  _latch    = LE;
-  _blank    = OE;
+  _le       = LE;
+  _oe       = OE;
   _buffer   = (uint8_t *) calloc(_channels, sizeof(uint8_t));
 }
 
@@ -38,13 +38,12 @@ bool TLC5917::begin()
 {
   pinMode(_clock, OUTPUT);
   pinMode(_data,  OUTPUT);
-  pinMode(_latch, OUTPUT);
-  pinMode(_blank, OUTPUT);
+  pinMode(_le, OUTPUT);
+  pinMode(_oe, OUTPUT);
   digitalWrite(_clock, LOW);
   digitalWrite(_data, LOW);
-  digitalWrite(_latch, LOW);
-  //  disable by default
-  //  safest option.
+  digitalWrite(_le, LOW);
+  //  disable by default, safest option.
   disable();
   return true;
 }
@@ -125,7 +124,7 @@ void TLC5917::write(int chan)
 
   for (int channel = chan - 1; channel >= 0; channel--)
   {
-    for (int mask = 0x0800;  mask; mask >>= 1)
+    for (uint8_t mask = 0x80;  mask; mask >>= 1)
     {
       *_clockRegister &= cbmask2;
       if (_buffer[channel] & mask)
@@ -151,7 +150,7 @@ void TLC5917::write(int chan)
 
   for (int channel = chan - 1; channel >= 0; channel--)
   {
-    for (int mask = 0x0800;  mask; mask >>= 1)
+    for (uint8_t mask = 0x80;  mask; mask >>= 1)
     {
       digitalWrite(_clk, LOW);
       digitalWrite(_dat, _buffer[channel] & mask ? HIGH : LOW);
@@ -163,8 +162,8 @@ void TLC5917::write(int chan)
 #endif
 
   //  pulse latch to hold the signals
-  digitalWrite(_latch, HIGH);
-  digitalWrite(_latch, LOW);
+  digitalWrite(_le, HIGH);
+  digitalWrite(_le, LOW);
 }
 
 
@@ -174,20 +173,98 @@ void TLC5917::write(int chan)
 //
 void TLC5917::enable()
 {
-  digitalWrite(_blank, LOW);
+  digitalWrite(_oe, LOW);
 }
 
 
 void TLC5917::disable()
 {
-  digitalWrite(_blank, HIGH);
+  digitalWrite(_oe, HIGH);
 }
 
 
 bool TLC5917::isEnabled()
 {
-  return (digitalRead(_blank) == LOW);
+  return (digitalRead(_oe) == LOW);
 }
+
+
+//////////////////////////////////////////////////
+//
+//  CONFIGURATION
+//
+//  NOT OPTIMIZED
+//
+//  Page 19
+void TLC5917::setCurrentAdjustMode()
+{
+  digitalWrite(_le, LOW);
+  digitalWrite(_oe, HIGH);
+
+  digitalWrite(_clock, HIGH);
+  digitalWrite(_clock, LOW);
+
+  digitalWrite(_oe, LOW);
+  digitalWrite(_clock, HIGH);
+  digitalWrite(_clock, LOW);
+
+  digitalWrite(_oe, HIGH);
+  digitalWrite(_clock, HIGH);
+  digitalWrite(_clock, LOW);
+
+  digitalWrite(_le, HIGH);
+  digitalWrite(_clock, HIGH);
+  digitalWrite(_clock, LOW);
+
+  digitalWrite(_le, LOW);
+  digitalWrite(_clock, HIGH);
+  digitalWrite(_clock, LOW);
+}
+
+
+//  Page 19
+void TLC5917::setNormalMode()
+{
+  digitalWrite(_le, LOW);
+  digitalWrite(_oe, HIGH);
+  digitalWrite(_clock, HIGH);
+  digitalWrite(_clock, LOW);
+
+  digitalWrite(_oe, LOW);
+  digitalWrite(_clock, HIGH);
+  digitalWrite(_clock, LOW);
+
+  digitalWrite(_oe, HIGH);
+  digitalWrite(_clock, HIGH);
+  digitalWrite(_clock, LOW);
+
+  digitalWrite(_clock, HIGH);
+  digitalWrite(_clock, LOW);
+
+  digitalWrite(_clock, HIGH);
+  digitalWrite(_clock, LOW);
+}
+
+
+void TLC5917::writeConfiguration(uint8_t config)
+{
+  uint8_t _clk = _clock;
+  uint8_t _dat = _data;
+
+  for (uint8_t mask = 0x80;  mask; mask >>= 1)
+  {
+    digitalWrite(_clk, LOW);
+    digitalWrite(_dat, config & mask ? HIGH : LOW);
+    digitalWrite(_clk, HIGH);
+  }
+  digitalWrite(_clk, LOW);
+
+  //  pulse latch to hold the signals in configuration register.
+  //  not exactly like Page 18 figure 13.
+  digitalWrite(_le, HIGH);
+  digitalWrite(_le, LOW);
+}
+
 
 
 /////////////////////////////////////////////////////////////
@@ -198,6 +275,7 @@ TLC5916::TLC5916(uint8_t clock, uint8_t data, uint8_t LE, uint8_t OE)
         :TLC5917(clock, data, LE, OE)
 {
   //  optional code, later.
+  //  type field?
 }
 
 

@@ -44,14 +44,21 @@ public:
   void     disable();
   bool     isEnabled();  //  returns status
 
+  //  configuration mode
+  //  TODO test if this works for single device.
+  //  TODO test if this works for cascaded devices.
+  void     setCurrentAdjustMode();
+  void     setNormalMode();
+  void     writeConfiguration(uint8_t config);
+
 
 protected:
   int       _channels;
   uint8_t * _buffer;
   uint8_t   _clock;
   uint8_t   _data;
-  uint8_t   _latch;
-  uint8_t   _blank;
+  uint8_t   _le;  //  latch enable
+  uint8_t   _oe;  //  output enable
 };
 
 
