@@ -250,14 +250,19 @@ void TLC5917::writeConfiguration(uint8_t config)
 {
   uint8_t _clk = _clock;
   uint8_t _dat = _data;
+  uint8_t _devices = _channels/8;
 
-  for (uint8_t mask = 0x80;  mask; mask >>= 1)
+  //  write same config to all devices
+  for (int i = 0; i < _devices; i++)
   {
+    for (uint8_t mask = 0x80;  mask; mask >>= 1)
+    {
+      digitalWrite(_clk, LOW);
+      digitalWrite(_dat, config & mask ? HIGH : LOW);
+      digitalWrite(_clk, HIGH);
+    }
     digitalWrite(_clk, LOW);
-    digitalWrite(_dat, config & mask ? HIGH : LOW);
-    digitalWrite(_clk, HIGH);
   }
-  digitalWrite(_clk, LOW);
 
   //  pulse latch to hold the signals in configuration register.
   //  not exactly like Page 18 figure 13.
