@@ -2,13 +2,13 @@
 //
 //    FILE: TLC5917.h
 //  AUTHOR: Rob Tillaart
-// VERSION: 0.1.1
+// VERSION: 0.1.2
 //    DATE: 2024-03-17
 // PURPOSE: Arduino library for TLC5917 8-Channel Constant-Current LED Sink Drivers.
 //     URL: https://github.com/RobTillaart/TLC5917
 
 
-#define TLC5917_LIB_VERSION             (F("0.1.1"))
+#define TLC5917_LIB_VERSION             (F("0.1.2"))
 
 
 #include "Arduino.h"
@@ -28,8 +28,11 @@
 #define OUTPUT  0
 */
 
-#define  TLC5917_OK                     0x0000
-#define  TLC5917_CHANNEL_ERROR          0xFFFF
+#define TLC5917_OK                      0x0000
+#define TLC5917_CHANNEL_ERROR           0xFFFF
+
+#define TLC5917_NORMAL_MODE             0x00
+#define TLC5917_SPECIAL_MODE            0x01
 
 
 class TLC5917
@@ -43,27 +46,29 @@ public:
 
   bool     begin();
   int      channelCount();  //  replaces getChannels which looks too much like getChannel.
-  int      getChannels();  //  will be obsolete in 0.2.0
+  int      getChannels();   //  will be obsolete in 0.2.0
 
   bool     setChannel(uint8_t channel, bool on);
-  bool     setChannel(uint8_t * array);  //  size must be deviceCount.
+  bool     setChannel(uint8_t * array);  //  size array must be deviceCount.
   bool     setAll(bool on);
   bool     getChannel(uint8_t channel);
 
-  //  write the buffer to the TLC5917 device(s).
+  //       write the buffer to the TLC5917 device(s).
   void     write(int n);
   void     write();
 
-  //  control the blank (OE) line.
+  //       control the blank (OE) line.
   void     enable();
   void     disable();
   bool     isEnabled();  //  returns status
 
-  //  configuration mode
-  //  TODO test if this works for single device.
-  //  TODO test if this works for cascaded devices.
+  //       GAIN configuration mode
+  //       TODO test if this works for single device.
+  //       TODO test if this works for cascaded devices.
   void     setCurrentAdjustMode();
   void     setNormalMode();
+  uint8_t  getMode();
+  //       writes same configuration to all devices.
   void     writeConfiguration(uint8_t config);
 
 
@@ -74,6 +79,7 @@ protected:
   uint8_t   _data;
   uint8_t   _le;  //  latch enable
   uint8_t   _oe;  //  output enable
+  uint8_t   _mode;
 };
 
 

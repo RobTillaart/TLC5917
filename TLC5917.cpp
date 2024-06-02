@@ -1,7 +1,7 @@
 //
 //    FILE: TLC5917.cpp
 //  AUTHOR: Rob Tillaart
-// VERSION: 0.1.1
+// VERSION: 0.1.2
 //    DATE: 2024-03-17
 // PURPOSE: Arduino library for TLC5917 8-Channel Constant-Current LED Sink Drivers.
 //     URL: https://github.com/RobTillaart/TLC5917
@@ -24,6 +24,7 @@ TLC5917::TLC5917(int deviceCount, uint8_t clock, uint8_t data, uint8_t LE, uint8
   _data   = data;
   _le     = LE;
   _oe     = OE;
+  _mode   = TLC5917_NORMAL_MODE;
   _buffer = (uint8_t *) calloc(_channelCount, sizeof(uint8_t));
 }
 
@@ -54,6 +55,7 @@ int TLC5917::channelCount()
   return _channelCount;
 }
 
+
 int TLC5917::getChannels()  //  OBSOLETE
 {
   return _channelCount;
@@ -63,8 +65,9 @@ int TLC5917::getChannels()  //  OBSOLETE
 bool TLC5917::setChannel(uint8_t channel, bool on)
 {
   if (channel >= _channelCount) return false;
-  if (on) _buffer[channel / 8] |=  (1 << (channel & 0x07));
-  else    _buffer[channel / 8] &= ~(1 << (channel & 0x07));
+  uint8_t mask = 1 << (channel & 0x07);
+  if (on) _buffer[channel / 8] |=  mask;
+  else    _buffer[channel / 8] &= ~mask;
   return true;
 }
 
@@ -93,7 +96,8 @@ bool TLC5917::setAll(bool on)
 bool TLC5917::getChannel(uint8_t channel)
 {
   if (channel >= _channelCount) return false;
-  return (_buffer[channel / 8] & (1 << (channel & 0x07))) > 0;
+  uint8_t mask = 1 << (channel & 0x07);
+  return (_buffer[channel / 8] & mask) > 0;
 }
 
 
@@ -224,6 +228,8 @@ void TLC5917::setCurrentAdjustMode()
   digitalWrite(_le, LOW);
   digitalWrite(_clock, HIGH);
   digitalWrite(_clock, LOW);
+
+  _mode = TLC5917_SPECIAL_MODE;
 }
 
 
@@ -248,31 +254,42 @@ void TLC5917::setNormalMode()
 
   digitalWrite(_clock, HIGH);
   digitalWrite(_clock, LOW);
+
+  _mode = TLC5917_NORMAL_MODE;
 }
 
 
+uint8_t TLC5917::getMode()
+{
+  return _mode;
+}
+
+
+//  9.4.3 Writing Configuration Code in Special Mode
 void TLC5917::writeConfiguration(uint8_t config)
 {
   uint8_t _clk = _clock;
   uint8_t _dat = _data;
-  uint8_t _devices = _channelCount/8;
+  uint8_t _devices = _channelCount / 8;
 
   //  write same configuration to all devices
   for (int i = 0; i < _devices; i++)
   {
-    for (uint8_t mask = 0x80;  mask; mask >>= 1)
+    //  handle bit 7- 1
+    for (uint8_t mask = 0x80;  mask > 1; mask >>= 1)
     {
       digitalWrite(_clk, LOW);
       digitalWrite(_dat, config & mask ? HIGH : LOW);
       digitalWrite(_clk, HIGH);
     }
+    //  bit 0 should have an LE pulse
     digitalWrite(_clk, LOW);
+    digitalWrite(_le, HIGH);
+    digitalWrite(_dat, config & 0x01 ? HIGH : LOW);
+    digitalWrite(_clk, HIGH);
+    digitalWrite(_clk, LOW);
+    digitalWrite(_le, LOW);
   }
-
-  //  pulse latch to hold the signals in configuration register.
-  //  not exactly like Page 18 figure 13.
-  digitalWrite(_le, HIGH);
-  digitalWrite(_le, LOW);
 }
 
 

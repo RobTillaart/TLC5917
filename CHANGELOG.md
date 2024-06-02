@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [0.1.2] - 2024-06-02
+- add **TLC5917_NORMAL_MODE** and **TLC5917_SPECIAL_MODE**
+- add **uint8_t getMode()**
+- refactored **writeConfiguration()**
+- minor edits.
+
+
 ## [0.1.1] - 2024-06-02
 - fix **setChannel()**
 - rename **getChannels()** to **channelCount()**

@@ -122,7 +122,10 @@ See datasheet page 23 for details.
 
 - **void setCurrentAdjustMode()**
 - **void setNormalMode()**
-- **void writeConfiguration(uint8_t config)** See page 23 datasheet
+- **void writeConfiguration(uint8_t config)** See page 23 datasheet.
+Writes same config to all devices. One must call setCurrentAdjustMode() first
+and setNormalMode() after..
+
 
 |      bit  |  0  |  1  |  2  |  3  |  4  |  5  |  6  |  7  |
 |:---------:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
@@ -134,6 +137,7 @@ CM limits the output current range.
 - Low Current Multiplier  (CM = 0):  3 mA to  40 mA.
 
 VG (voltage gain) = (1 + HC) × (1 + D/64) / 4
+
 where  D = CC0 × 32 + CC1 × 16 + CC2 × 8 + CC3 × 4 + CC4 × 2 + CC5
 
 CG (current gain) = VG x pow(3, CM - 1)    
@@ -159,24 +163,28 @@ See **TLC5917_performance.ino** for an indicative test.
 
 - update documentation
 - buy hardware
-  - test test test 
-- get basic functionality running
+  - test test test
 
 #### Should
 
-- get basic functionality running
 - investigate daisy chaining. (hardware needed).
   - max CLOCK speed when chained (50% DutyCycle)
   - what is clock in practice (e.g. an ESP32 240 MHz)
 
 #### Could
 
-- add examples
-- **void getChannel(uint8_t array)** fill array with current data
-- **index operator []** to set channels?
+- implement a more linear gain function
+  - **void setGain(float 0.0-1.0)** + getter
+  - given the chart in the datasheet there is room for linearization.
+  - setGain() should take care of switching mode.
+- **index operator []** to get set channels, might be better?
+- reading error codes from SDO
 
 
-#### Wont
+#### Wont (unless needed)
+
+- **void getChannel(uint8_t array)** fill an array with current data.
+
 
 
 ## Support
