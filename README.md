@@ -25,7 +25,7 @@ The library allows to set outputs individually or a group in one call.
 The TLC5916 is a derived class that is functional identical to the TLC5917 (for now).
 When implementation proceeds this might change.
 
-The library is **experimental** and needs more testing with hardware.  
+The library needs more testing with hardware.  
 Please share your experiences.
 
 (Changes of the interface are definitely possible).
@@ -184,7 +184,8 @@ See **TLC5917_performance.ino** for an indicative test.
 #### Wont (unless needed)
 
 - **void getChannel(uint8_t array)** fill an array with current data.
-
+- error handling in special mode
+  - over-temperature, open-load, short to GND, short to VLED (5917 only).
 
 
 ## Support
