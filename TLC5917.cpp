@@ -49,7 +49,12 @@ bool TLC5917::begin()
 }
 
 
-int TLC5917::getChannels()
+int TLC5917::channelCount()
+{
+  return _channelCount;
+}
+
+int TLC5917::getChannels()  //  OBSOLETE
 {
   return _channelCount;
 }
