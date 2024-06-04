@@ -65,7 +65,7 @@ public:
   //       GAIN configuration mode
   //       TODO test if this works for single device.
   //       TODO test if this works for cascaded devices.
-  void     setCurrentAdjustMode();
+  void     setSpecialMode();
   void     setNormalMode();
   uint8_t  getMode();
   //       writes same configuration to all devices.

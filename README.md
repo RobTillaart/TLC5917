@@ -120,10 +120,10 @@ The blank parameter in the constructor should be set to -1 (out of range value).
 
 See datasheet page 23 for details.
 
-- **void setCurrentAdjustMode()**
+- **void setSpecialMode()**
 - **void setNormalMode()**
 - **void writeConfiguration(uint8_t config)** See page 23 datasheet.
-Writes same config to all devices. One must call setCurrentAdjustMode() first
+Writes same configuration to all devices. One must call setSpecialMode() first
 and setNormalMode() after..
 
 
@@ -149,7 +149,7 @@ VG = 2 x ( 1 + 63/64) / 4 = 127/128
 ```
 
 TODO test with hardware to understand this in detail.  
-Actual current depends on Rext (see datasheet).
+Actual current depends on Rext == external resistor (see datasheet).
 
 
 ## Performance

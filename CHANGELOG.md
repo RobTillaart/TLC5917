@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [0.1.2] - 2024-06-02
 - add **TLC5917_NORMAL_MODE** and **TLC5917_SPECIAL_MODE**
 - add **uint8_t getMode()**
+- rename setCurrentAdjustMode() to **void setSpecialMode()**
 - refactored **writeConfiguration()**
 - minor edits.
 

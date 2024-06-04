@@ -20,7 +20,7 @@ enable	KEYWORD2
 disable	KEYWORD2
 isEnabled	KEYWORD2
 
-setCurrentAdjustMode	KEYWORD2
+setSpecialMode	KEYWORD2
 setNormalMode	KEYWORD2
 writeConfiguration	KEYWORD2
 

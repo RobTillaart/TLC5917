@@ -205,7 +205,7 @@ bool TLC5917::isEnabled()
 //  NOT OPTIMIZED
 //
 //  Page 19
-void TLC5917::setCurrentAdjustMode()
+void TLC5917::setSpecialMode()
 {
   digitalWrite(_le, LOW);
   digitalWrite(_oe, HIGH);

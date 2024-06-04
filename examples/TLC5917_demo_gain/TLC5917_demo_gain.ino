@@ -44,7 +44,7 @@ void setup()
 
   Serial.print("MODE:\t");
   Serial.println(tlc.getMode());
-  tlc.setCurrentAdjustMode();
+  tlc.setSpecialMode();
   Serial.print("MODE:\t");
   Serial.println(tlc.getMode());
   uint32_t start = millis();
@@ -62,7 +62,7 @@ void setup()
 
   Serial.println("\ndone...");
 
-  tlc.setCurrentAdjustMode();
+  tlc.setSpecialMode();
 }
 
 
