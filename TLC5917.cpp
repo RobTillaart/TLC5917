@@ -56,12 +56,6 @@ int TLC5917::channelCount()
 }
 
 
-int TLC5917::getChannels()  //  OBSOLETE
-{
-  return _channelCount;
-}
-
-
 bool TLC5917::setChannel(uint8_t channel, bool on)
 {
   if (channel >= _channelCount) return false;
@@ -161,12 +155,11 @@ void TLC5917::write(int chan)
   {
     for (uint8_t mask = 0x80;  mask; mask >>= 1)
     {
-      digitalWrite(_clk, LOW);
       digitalWrite(_dat, _buffer[channel] & mask ? HIGH : LOW);
       digitalWrite(_clk, HIGH);
+      digitalWrite(_clk, LOW);
     }
   }
-  digitalWrite(_clk, LOW);
 
 #endif
 
@@ -266,7 +259,7 @@ uint8_t TLC5917::getMode()
 
 
 //  9.4.3 Writing Configuration Code in Special Mode
-void TLC5917::writeConfiguration(uint8_t config)
+void TLC5917::writeConfiguration(uint8_t configuration)
 {
   uint8_t _clk = _clock;
   uint8_t _dat = _data;
@@ -278,14 +271,13 @@ void TLC5917::writeConfiguration(uint8_t config)
     //  handle bit 7- 1
     for (uint8_t mask = 0x80;  mask > 1; mask >>= 1)
     {
-      digitalWrite(_clk, LOW);
-      digitalWrite(_dat, config & mask ? HIGH : LOW);
+      digitalWrite(_dat, configuration & mask ? HIGH : LOW);
       digitalWrite(_clk, HIGH);
+      digitalWrite(_clk, LOW);
     }
     //  bit 0 should have an LE pulse
-    digitalWrite(_clk, LOW);
     digitalWrite(_le, HIGH);
-    digitalWrite(_dat, config & 0x01 ? HIGH : LOW);
+    digitalWrite(_dat, configuration & 0x01 ? HIGH : LOW);
     digitalWrite(_clk, HIGH);
     digitalWrite(_clk, LOW);
     digitalWrite(_le, LOW);

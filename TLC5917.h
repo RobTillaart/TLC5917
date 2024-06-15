@@ -45,11 +45,11 @@ public:
   virtual ~TLC5917();
 
   bool     begin();
-  int      channelCount();  //  replaces getChannels which looks too much like getChannel.
-  int      getChannels();   //  will be obsolete in 0.2.0
+  int      channelCount();
 
   bool     setChannel(uint8_t channel, bool on);
-  bool     setChannel(uint8_t * array);  //  size array must be deviceCount.
+  //       size array must be equal or larger than deviceCount.
+  bool     setChannel(uint8_t * array);
   bool     setAll(bool on);
   bool     getChannel(uint8_t channel);
 
@@ -68,8 +68,8 @@ public:
   void     setSpecialMode();
   void     setNormalMode();
   uint8_t  getMode();
-  //       writes same configuration to all devices.
-  void     writeConfiguration(uint8_t config);
+  //       writes the same configuration to all devices.
+  void     writeConfiguration(uint8_t configuration);
 
 
 protected:

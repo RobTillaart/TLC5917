@@ -10,9 +10,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - add **TLC5917_NORMAL_MODE** and **TLC5917_SPECIAL_MODE**
 - add **uint8_t getMode()**
 - rename setCurrentAdjustMode() to **void setSpecialMode()**
+- rename **getChannels()** into **channelCount()** (looked like getChannel)
 - refactored **writeConfiguration()**
 - minor edits.
-
 
 ## [0.1.1] - 2024-06-02
 - fix **setChannel()**
@@ -20,7 +20,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - update examples
 - update readme.md
 - minor edits
-
 
 ## [0.1.0] - 2024-03-17
 - initial version

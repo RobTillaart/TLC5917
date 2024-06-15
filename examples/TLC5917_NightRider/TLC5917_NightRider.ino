@@ -24,7 +24,11 @@ void setup()
   Serial.print("TLC5917_LIB_VERSION: \t");
   Serial.println(TLC5917_LIB_VERSION);
 
-  tlc.begin();
+  if (tlc.begin() == false)
+  {
+    Serial.println("error");
+    while (1);
+  }
   tlc.enable();
 }
 

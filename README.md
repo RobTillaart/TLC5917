@@ -33,7 +33,7 @@ Please share your experiences.
 
 #### Daisy chaining
 
-This library supports daisy chaining.
+This library supports daisy chaining of TLC5917 modules.
 A constructor takes the number of devices as parameter and 
 an internal buffer is allocated (8 elements per device).
 This internal buffer is clocked into the devices with **write()**.
@@ -65,7 +65,7 @@ The blank pin is explained in more detail below.
 To be used for multiple devices, typical 2 or more.
 Defines the pins used for uploading / writing the PWM data to the module.
 The blank pin is explained in more detail below. 
-- **~TLC5917()** destructor
+- **~TLC5917()** destructor. Frees the allocated memory.
 
 #### Base
 
@@ -73,8 +73,7 @@ The blank pin is explained in more detail below.
 The TLC is disabled by default, as the device has random values in its grey-scale register. 
 One must call **enable()** explicitly.
 - **int channelCount()** return the amount of channels == 8 x number of devices.
-- **int getChannels()** return the amount of channels == 8 x number of devices.
-Will be obsolete in 0.2.0.
+
 
 #### Set/Get channels
 
@@ -85,16 +84,16 @@ The user has to take care the the size of array holds the right amount of bytes.
 - **bool setAll(bool on)** set all channels on or off.
 - **bool getChannel(uint8_t channel)** get current state of a channel in the cached buffer.
 - **void write()** writes the whole buffer (deviceCount x 8 values) to the device(s).
-- **void write(int n)** writes a part of the buffer (only **n** values) to the device.
+- **void write(int n)** writes a part of the internal buffer (only **n** values) to the device.
 Typical used to speed up if less than max number e.g. only 17 channels are used
 and needs to be updated.  
 **experimental, might have side effects**
 
 
 **write()** must be called after setting all values one wants to change.
-Doing that per channel is far less efficient if one wants to update multiple 
+Updating per channel is possible but far less efficient if one has to update multiple 
 channels as fast as possible.
-See also **TLC5917_performance.ino** for an indication of time.
+See also **TLC5917_performance.ino** for an indication of time needed.
 
 
 #### Blank line  TODO CHECK
@@ -115,6 +114,9 @@ a separate **enable()** per device you might need to connect the devices
 "in parallel" instead of "in series" (daisy chained).
 The blank parameter in the constructor should be set to -1 (out of range value).
 
+It might be possible to use a PWM pin on the OE line to dim the LEDS.
+This is neither tested or supported by the library.
+
 
 #### Configure gain
 
@@ -122,7 +124,7 @@ See datasheet page 23 for details.
 
 - **void setSpecialMode()**
 - **void setNormalMode()**
-- **void writeConfiguration(uint8_t config)** See page 23 datasheet.
+- **void writeConfiguration(uint8_t configuration)** See page 23 datasheet.
 Writes same configuration to all devices. One must call setSpecialMode() first
 and setNormalMode() after..
 
