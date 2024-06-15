@@ -12,6 +12,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - rename setCurrentAdjustMode() to **void setSpecialMode()**
 - rename **getChannels()** into **channelCount()** (looked like getChannel)
 - refactored **writeConfiguration()**
+- add **uint8_t getConfiguration()**
+- add **bool setGain(bool CM, bool HC, uint8_t CC)**
+- add **bool setCurrentGain(float n)**
+- add **float getVoltageGain()**
+- add **float getCurrentGain()**
+- update readme.md
+- add / update examples.
 - minor edits.
 
 ## [0.1.1] - 2024-06-02

@@ -18,12 +18,15 @@ TLC5917 is an Arduino library for TLC5917 8-Channel Constant-Current LED Sink Dr
 
 **Experimental**
 
-This library allows control over the 8 channels of a TLC5917 device.
+The **TLC5917** library allows control over the 8 channels (outputs) of a TLC5917 device.
+This library also support more than one device in a daisy chain (see below).
 
-The library allows to set outputs individually or a group in one call.
+The library allows to set the channels (outputs) individually or a group in one call.
+Furthermore it allows to set a current gain for all devices connected.
 
-The TLC5916 is a derived class that is functional identical to the TLC5917 (for now).
-When implementation proceeds this might change.
+The **TLC5916** is a derived class that is functional identical to the TLC5917 (for now).
+When implementation proceeds this might change, the difference is in support for fetching 
+the status and error modi. This is not supported by the library
 
 The library needs more testing with hardware.  
 Please share your experiences.
@@ -122,35 +125,52 @@ This is neither tested or supported by the library.
 
 See datasheet page 23 for details.
 
-- **void setSpecialMode()**
-- **void setNormalMode()**
+- **void setNormalMode()**  to send the data for the LEDS.
+- **void setSpecialMode()**  to configure the gain.
+
+
+The special mode needs to be set for the following functions:
+
 - **void writeConfiguration(uint8_t configuration)** See page 23 datasheet.
 Writes same configuration to all devices. One must call setSpecialMode() first
 and setNormalMode() after..
+- **uint8_t getConfiguration()** returns last written configuration 
+bit mask (from cache).
+- **bool setGain(bool CM, bool HC, uint8_t CC)**  CC = {0..63}
+returns false if CC >= 64
+- **bool setCurrentGain(float n)** n = 0.250 - 3.000 (nicer range).  
+Over the range 0.250 - 2.989 the max error is 0.0124  
+Over the range 2.989 - 3.000 the max error goes up to 0.023  
+So except for end of the range the error is (IMHO) small.
+Returns false if out of range (n < 0.250 or n > 3.0).  
+- **float getVoltageGain()** see below (from cache).
+- **float getCurrentGain()** see below (from cache).
 
 
 |      bit  |  0  |  1  |  2  |  3  |  4  |  5  |  6  |  7  |
 |:---------:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-|  meaning  |  CM |  HC | CC0 | CC1 | CC2 | CC3 | CC4 | CC5 |
+|  abbrev   |  CM |  HC | CC0 | CC1 | CC2 | CC3 | CC4 | CC5 |
 |  default  |  1  |  1  |  1  |  1  |  1  |  1  |  1  |  1  |
 
-CM limits the output current range.  
-- High Current Multiplier (CM = 1): 10 mA to 120 mA.
-- Low Current Multiplier  (CM = 0):  3 mA to  40 mA.
+CM == Current Multiplier
+- limits the output current range.  
+- Low  (CM = 0):  3 mA to  40 mA.
+- High (CM = 1): 10 mA to 120 mA.  == CM(0) x 3
 
 VG (voltage gain) = (1 + HC) × (1 + D/64) / 4
 
-where  D = CC0 × 32 + CC1 × 16 + CC2 × 8 + CC3 × 4 + CC4 × 2 + CC5
+where  D = CC0 × 32 + CC1 × 16 + CC2 × 8 + CC3 × 4 + CC4 × 2 + CC5  
+       D = 0..63
 
 CG (current gain) = VG x pow(3, CM - 1)    
 
 ```
 Default 
-CG = VG x 3;  
-VG = 2 x ( 1 + 63/64) / 4 = 127/128
+VG = 2 x ( 1 + 63/64) / 4 = 127/128  
+CG = VG x 3 = ~2.977
 ```
 
-TODO test with hardware to understand this in detail.  
+TODO: test with hardware to understand this in detail.  
 Actual current depends on Rext == external resistor (see datasheet).
 
 
@@ -172,22 +192,21 @@ See **TLC5917_performance.ino** for an indicative test.
 - investigate daisy chaining. (hardware needed).
   - max CLOCK speed when chained (50% DutyCycle)
   - what is clock in practice (e.g. an ESP32 240 MHz)
+- now the CurrentGain is set to the same value for all devices.
+  - needs array, one value (uint8_t or float) per device, investigate.
 
 #### Could
 
-- implement a more linear gain function
-  - **void setGain(float 0.0-1.0)** + getter
-  - given the chart in the datasheet there is room for linearization.
-  - setGain() should take care of switching mode.
 - **index operator []** to get set channels, might be better?
 - reading error codes from SDO
-
 
 #### Wont (unless needed)
 
 - **void getChannel(uint8_t array)** fill an array with current data.
 - error handling in special mode
   - over-temperature, open-load, short to GND, short to VLED (5917 only).
+- investigate if hardware SPI is possible
+  - which mode?
 
 
 ## Support

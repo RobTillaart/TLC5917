@@ -1,7 +1,7 @@
 //
 //      FILE: TLC5917_NightRider.ino
 //    AUTHOR: Rob Tillaart
-//   PURPOSE: demo
+//   PURPOSE: demo running leds.
 //       URL: https://github.com/RobTillaart/TLC5917
 
 

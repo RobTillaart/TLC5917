@@ -68,18 +68,27 @@ public:
   void     setSpecialMode();
   void     setNormalMode();
   uint8_t  getMode();
+
   //       writes the same configuration to all devices.
   void     writeConfiguration(uint8_t configuration);
+  uint8_t  getConfiguration();
+  bool     setGain(bool CM, bool HC, uint8_t CC);  //  CC 0..63
+  bool     setCurrentGain(float n);  //  n = 0.250 - 3.000
+  float    getVoltageGain();
+  float    getCurrentGain();
 
 
 protected:
   int       _channelCount;
   uint8_t * _buffer;
+
   uint8_t   _clock;
   uint8_t   _data;
   uint8_t   _le;  //  latch enable
   uint8_t   _oe;  //  output enable
+
   uint8_t   _mode;
+  uint8_t   _configuration;
 };
 
 

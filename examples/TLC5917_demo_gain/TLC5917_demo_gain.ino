@@ -1,7 +1,7 @@
 //
 //    FILE: TLC5917_demo_gain.ino
 //  AUTHOR: Rob Tillaart
-// PURPOSE: demo
+// PURPOSE: demo writeConfiguration() to set gain.
 //     URL: https://github.com/RobTillaart/TLC5917
 
 

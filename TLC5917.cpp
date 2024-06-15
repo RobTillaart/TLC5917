@@ -26,6 +26,7 @@ TLC5917::TLC5917(int deviceCount, uint8_t clock, uint8_t data, uint8_t LE, uint8
   _oe     = OE;
   _mode   = TLC5917_NORMAL_MODE;
   _buffer = (uint8_t *) calloc(_channelCount, sizeof(uint8_t));
+  _configuration = 0xFF;  //  page 23  datasheet
 }
 
 
@@ -112,6 +113,7 @@ void TLC5917::write(int chan)
   if (chan > _channelCount) chan = _channelCount;
   if (chan < 0) return;
 
+
 #if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_MEGAAVR)
 
   //  register level optimized AVR
@@ -129,19 +131,18 @@ void TLC5917::write(int chan)
   {
     for (uint8_t mask = 0x80;  mask; mask >>= 1)
     {
-      *_clockRegister &= cbmask2;
       if (_buffer[channel] & mask)
       {
-        *_dataOutRegister |= outmask1;
+        *_dataOutRegister |= outmask1;  //  digitalWrite(_dat, HIGH);
       }
       else
       {
-        *_dataOutRegister &= outmask2;
+        *_dataOutRegister &= outmask2;  //  digitalWrite(_dat, LOW);
       }
-      *_clockRegister |= cbmask1;
+      *_clockRegister |= cbmask1;  //  digitalWrite(_clk, HIGH);
+      *_clockRegister &= cbmask2;  //  digitalWrite(_clk, LOW);
     }
   }
-  *_clockRegister &= cbmask2;
 
 #else
 
@@ -282,8 +283,81 @@ void TLC5917::writeConfiguration(uint8_t configuration)
     digitalWrite(_clk, LOW);
     digitalWrite(_le, LOW);
   }
+  _configuration = configuration;
 }
 
+
+uint8_t TLC5917::getConfiguration()
+{
+  return _configuration;
+}
+
+
+//  Page 23
+bool TLC5917::setGain(bool CM, bool HC, uint8_t CC)
+{
+  if (CC > 63) return false;
+  _configuration = CC;
+  if (CM) _configuration |= 0x80;
+  if (HC) _configuration |= 0x40;
+  writeConfiguration(_configuration);
+  return true;
+}
+
+
+float TLC5917::getVoltageGain()
+{
+  uint8_t CC = _configuration & 0x3F;  //  0..63
+  uint8_t HC = (_configuration & 0x40) ? 1 : 0;
+  float VG = (1.0 + HC) * (1.0 + CC * 0.015625) / 4;  //  0.015625 = 1/64
+  return VG;
+}
+
+
+float TLC5917::getCurrentGain()
+{
+  float CG = getVoltageGain();
+  // uint8_t CM = _configuration & 0x80;
+  if (_configuration & 0x80) CG *= 3;
+  return CG;
+}
+
+
+bool TLC5917::setCurrentGain(float n)
+{
+  if (n < 0.250) return false;
+  if (n > 3.000) return false;
+
+  uint8_t CM = 0;
+  uint8_t HC = 0;
+  uint8_t CC = 0;
+
+  //  n == (1 + HC) × (1 + D/64) / 4 * pow(3, CM - 1);
+  //  handle CM=1: values 1.0 - 2.977 == 150 - 255
+  //  note values 128 - 149 not used (twice in table)
+  if (n >= 1.0)
+  {
+    CM = 1;
+    n /= 3;
+  }
+  //  n == (1 + HC) × (1 + D/64) / 4
+  //  handle HC=1: values 0.5 - 1.0 == 64 - 127
+  if (n >= 0.5)
+  {
+    HC = 1;
+    n /= 2;
+  }
+
+  //  n == (1 + CC/64)/4;
+  //  values 0.25 - 0.5
+  n *= 4;
+  n -= 1;
+  if (n < 0) n = 0;
+  CC = round(n * 64);
+  if (CC >= 64) CC = 63;  //  truncate at top.
+  setGain(CM, HC, CC);
+  return true;
+}
 
 
 /////////////////////////////////////////////////////////////
