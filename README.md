@@ -21,12 +21,13 @@ TLC5917 is an Arduino library for TLC5917 8-Channel Constant-Current LED Sink Dr
 The **TLC5917** library allows control over the 8 channels (outputs) of a TLC5917 device.
 This library also support more than one device in a daisy chain (see below).
 
-The library allows to set the channels (outputs) individually or a group in one call.
+The library allows to set the channels (outputs) individually or as a group in one call.
 Furthermore it allows to set a current gain for all devices connected.
 
-The **TLC5916** is a derived class that is functional identical to the TLC5917 (for now).
+The **TLC5916** is a derived class that is functional identical to the TLC5917.
 When implementation proceeds this might change, the difference is in support for fetching 
-the status and error modi. This is not supported by the library
+the status and error modi. This functionality is not supported by the library yet, 
+so there is no difference between the **TLC5916** and **TLC5917** for now. 
 
 The library needs more testing with hardware.  
 Please share your experiences.
@@ -34,15 +35,22 @@ Please share your experiences.
 (Changes of the interface are definitely possible).
 
 
-#### Daisy chaining
+### Breaking changes
 
-This library supports daisy chaining of TLC5917 modules.
+The 0.2.0 version fixed an internal storage bug which allocated way to much memory
+in version 0.1.x. So these versions are obsolete.
+
+
+### Daisy chaining
+
+This library supports daisy chaining of multiple **TLC5917** modules.
 A constructor takes the number of devices as parameter and 
 an internal buffer is allocated (8 elements per device).
-This internal buffer is clocked into the devices with **write()**.
+This internal buffer is clocked into the devices with the **write()** call.
+So **setChannel()** calls can be changed until last moment.
 
 
-#### Related
+### Related
 
 - https://www.adafruit.com/product/1429
 - https://github.com/RobTillaart/TLC5917
@@ -58,19 +66,19 @@ This internal buffer is clocked into the devices with **write()**.
 #include TLC5917.h
 ```
 
-#### Constructor
+### Constructor
 
-- **TLC5917(uint8_t clock, uint8_t data, uint8_t latch, uint8_t blank)** constructor.
+- **TLC5917(uint8_t clock, uint8_t data, uint8_t latch, uint8_t outputEnable)** constructor.
 Single device constructor.
 Defines the pins used for uploading / writing the PWM data to the module.
-The blank pin is explained in more detail below. 
-- **TLC5917(int deviceCount, uint8_t clock, uint8_t data, uint8_t latch, uint8_t blank)** constructor.
+The outputEnable pin is explained in more detail below. 
+- **TLC5917(int deviceCount, uint8_t clock, uint8_t data, uint8_t latch, uint8_t outputEnable)** constructor.
 To be used for multiple devices, typical 2 or more.
 Defines the pins used for uploading / writing the PWM data to the module.
-The blank pin is explained in more detail below. 
+The outputEnable pin is explained in more detail below. 
 - **~TLC5917()** destructor. Frees the allocated memory.
 
-#### Base
+### Base
 
 - **bool begin()** set the pinModes of the pins and their initial values.
 The TLC is disabled by default, as the device has random values in its grey-scale register. 
@@ -78,7 +86,7 @@ One must call **enable()** explicitly.
 - **int channelCount()** return the amount of channels == 8 x number of devices.
 
 
-#### Set/Get channels
+### Set/Get channels
 
 - **bool setChannel(uint8_t channel, bool on)** set a channel on or off in the 
 internal buffer. The value is not written yet to the device(s).
@@ -99,29 +107,33 @@ channels as fast as possible.
 See also **TLC5917_performance.ino** for an indication of time needed.
 
 
-#### Blank line  TODO CHECK
+### OutputEnable line
  
-The blank pin (OE line) is used to set all channels on or off.
+The **outputEnable** pin (OE or blank) is used to set all channels on or off.
 This allows to "preload" the registers with values and enable them all at once
 with very precise timing.
 
 Default a TLC device is disabled (by begin), so one should enable it "manually".  
 (P13 datasheet)
 
-- **void enable()** all channels reflect last PWM values written.
+- **void enable()** all channels reflect last values written.
 - **void disable()** all channels are off / 0.
-- **bool isEnabled()** returns status of blank line.
+- **bool isEnabled()** returns status of outputEnable line.
 
-The library only supports one **enable() / blank line**. If you want
-a separate **enable()** per device you might need to connect the devices
+The library only supports one **enable() line**. 
+If you want a separate **enable()** per device you might need to connect the devices
 "in parallel" instead of "in series" (daisy chained).
-The blank parameter in the constructor should be set to -1 (out of range value).
+The outputEnable parameter in the constructor should be set to -1 (out of range value).
 
-It might be possible to use a PWM pin on the OE line to dim the LEDS.
+#### PWM
+
+It might be possible to use a PWM pin on the **outputEnable** line to dim the LEDS.
 This is neither tested or supported by the library.
+Note that writing to the TLC5917 needs a HIGH **outputEnable** so the PWM value needs 
+to be set again.
 
 
-#### Configure gain
+### Configure gain
 
 See datasheet page 23 for details.
 
@@ -184,8 +196,7 @@ See **TLC5917_performance.ino** for an indicative test.
 #### Must
 
 - update documentation
-- buy hardware
-  - test test test
+- do hardware test test test ...
 
 #### Should
 
@@ -197,8 +208,14 @@ See **TLC5917_performance.ino** for an indicative test.
 
 #### Could
 
+- investigate hardware SPI
+  - additional constructors needed.
+- redo constructor, 
+  - move deviceCount to last place with default = 1
+  - see above HWSPI.
 - **index operator []** to get set channels, might be better?
 - reading error codes from SDO
+- do brightness test with analogWrite(OE, value);
 
 #### Wont (unless needed)
 

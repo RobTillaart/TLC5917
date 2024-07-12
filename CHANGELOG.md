@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [0.2.0] - 2024-07-12
+- fix deviceCount in **write()**
+- fix allocation buffer for channels.
+- update performance sketch
+- rename blank to **outputEnable**
+
+
+----
+
 ## [0.1.2] - 2024-06-02
 - add **TLC5917_NORMAL_MODE** and **TLC5917_SPECIAL_MODE**
 - add **uint8_t getMode()**

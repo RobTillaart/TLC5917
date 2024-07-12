@@ -1,20 +1,20 @@
 //
-//      FILE: TLC5917_NightRider.ino
-//    AUTHOR: Rob Tillaart
-//   PURPOSE: demo running leds.
-//       URL: https://github.com/RobTillaart/TLC5917
+//    FILE: TLC5917_NightRider.ino
+//  AUTHOR: Rob Tillaart
+// PURPOSE: demo running leds.
+//     URL: https://github.com/RobTillaart/TLC5917
 
 
 #include "TLC5917.h"
 
 
-int DEVICES = 1;
-const int CLOCK = 13;
-const int DATA  = 12;
-const int LATCH = 11;
-const int BLANK = 10;
+const int DEVICES = 1;
+const int CLOCK   = 13;
+const int DATA    = 12;
+const int LATCH   = 11;
+const int ENABLE  = 10;
 
-TLC5917 tlc(DEVICES, CLOCK, DATA, LATCH, BLANK);
+TLC5917 tlc(DEVICES, CLOCK, DATA, LATCH, ENABLE);
 
 
 void setup()
@@ -53,7 +53,7 @@ void loop()
   tlc.write();
 
   pos += delta;
-  if ((pos == 0) || (pos == (tlc.channelCount() - 1))) 
+  if ((pos == 0) || (pos == (tlc.channelCount() - 1)))
   {
     delta = -delta;
   }

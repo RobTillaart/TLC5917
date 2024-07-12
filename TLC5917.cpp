@@ -1,7 +1,7 @@
 //
 //    FILE: TLC5917.cpp
 //  AUTHOR: Rob Tillaart
-// VERSION: 0.1.2
+// VERSION: 0.2.0
 //    DATE: 2024-03-17
 // PURPOSE: Arduino library for TLC5917 8-Channel Constant-Current LED Sink Drivers.
 //     URL: https://github.com/RobTillaart/TLC5917
@@ -25,7 +25,7 @@ TLC5917::TLC5917(int deviceCount, uint8_t clock, uint8_t data, uint8_t LE, uint8
   _le     = LE;
   _oe     = OE;
   _mode   = TLC5917_NORMAL_MODE;
-  _buffer = (uint8_t *) calloc(_channelCount, sizeof(uint8_t));
+  _buffer = (uint8_t *) calloc(deviceCount, sizeof(uint8_t));
   _configuration = 0xFF;  //  page 23  datasheet
 }
 
@@ -113,7 +113,6 @@ void TLC5917::write(int chan)
   if (chan > _channelCount) chan = _channelCount;
   if (chan < 0) return;
 
-
 #if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_MEGAAVR)
 
   //  register level optimized AVR
@@ -127,7 +126,7 @@ void TLC5917::write(int chan)
   uint8_t cbmask1  = digitalPinToBitMask(_clock);
   uint8_t cbmask2  = ~cbmask1;
 
-  for (int channel = chan - 1; channel >= 0; channel--)
+  for (int channel = chan - 1; channel >= 0; channel -= 8)
   {
     for (uint8_t mask = 0x80;  mask; mask >>= 1)
     {
@@ -146,13 +145,13 @@ void TLC5917::write(int chan)
 
 #else
 
-  //  also write when blank == LOW
+  //  also write when outputEnable == LOW
   //       to "preload the registers"
   //  local variables to maximize speed.
   uint8_t _clk = _clock;
   uint8_t _dat = _data;
 
-  for (int channel = chan - 1; channel >= 0; channel--)
+  for (int channel = chan - 1; channel >= 0; channel -= 8)
   {
     for (uint8_t mask = 0x80;  mask; mask >>= 1)
     {

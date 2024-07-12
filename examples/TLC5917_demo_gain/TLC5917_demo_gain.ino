@@ -3,18 +3,19 @@
 //  AUTHOR: Rob Tillaart
 // PURPOSE: demo writeConfiguration() to set gain.
 //     URL: https://github.com/RobTillaart/TLC5917
-
+//
+//  needs investigation.
 
 #include "TLC5917.h"
 
 
 const int DEVICES = 1;
-const int CLOCK = 13;
-const int DATA  = 12;
-const int LE    = 11;
-const int OE    = 10;
+const int CLOCK   = 13;
+const int DATA    = 12;
+const int LATCH   = 11;
+const int ENABLE  = 10;
 
-TLC5917 tlc(DEVICES, CLOCK, DATA, LE, OE);
+TLC5917 tlc(DEVICES, CLOCK, DATA, LATCH, ENABLE);
 
 
 void setup()
@@ -35,13 +36,17 @@ void setup()
   Serial.println(tlc.channelCount());
 
   //  set all leds ON
+  tlc.setNormalMode();
   tlc.enable();
+
   for (int ch = 0; ch < tlc.channelCount(); ch++)
   {
     tlc.setChannel(ch, true);
   }
   tlc.write();
+  delay(1000);
 
+  Serial.println("takes ~26 seconds");
   Serial.print("MODE:\t");
   Serial.println(tlc.getMode());
   tlc.setSpecialMode();
@@ -51,7 +56,7 @@ void setup()
   for (int conf = 0; conf < 256; conf++)
   {
     tlc.writeConfiguration(conf);
-    delay(100);
+    delay(10);
   }
   uint32_t stop = millis();
   tlc.setNormalMode();
