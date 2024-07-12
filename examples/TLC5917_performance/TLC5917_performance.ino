@@ -102,6 +102,7 @@ void testWrite()
   stop = micros();
   Serial.print("WRITE:\t\t\t");
   Serial.println(stop - start);
+  delay(100);
 }
 
 

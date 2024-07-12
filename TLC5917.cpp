@@ -108,10 +108,12 @@ void TLC5917::write()
 }
 
 
-void TLC5917::write(int chan)
+void TLC5917::write(int channelCount)
 {
-  if (chan > _channelCount) chan = _channelCount;
-  if (chan < 0) return;
+  if (channelCount > _channelCount) channelCount = _channelCount;
+  if (channelCount < 0) return;
+  int devices = channelCount / 8;
+
 
 #if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_MEGAAVR)
 
@@ -126,11 +128,11 @@ void TLC5917::write(int chan)
   uint8_t cbmask1  = digitalPinToBitMask(_clock);
   uint8_t cbmask2  = ~cbmask1;
 
-  for (int channel = chan - 1; channel >= 0; channel -= 8)
+  for (int dev = devices - 1; dev >= 0; dev--)
   {
     for (uint8_t mask = 0x80;  mask; mask >>= 1)
     {
-      if (_buffer[channel] & mask)
+      if (_buffer[dev] & mask)
       {
         *_dataOutRegister |= outmask1;  //  digitalWrite(_dat, HIGH);
       }
@@ -151,11 +153,11 @@ void TLC5917::write(int chan)
   uint8_t _clk = _clock;
   uint8_t _dat = _data;
 
-  for (int channel = chan - 1; channel >= 0; channel -= 8)
+  for (int dev = devices - 1; dev >= 0; dev--)
   {
     for (uint8_t mask = 0x80;  mask; mask >>= 1)
     {
-      digitalWrite(_dat, _buffer[channel] & mask ? HIGH : LOW);
+      digitalWrite(_dat, _buffer[dev] & mask ? HIGH : LOW);
       digitalWrite(_clk, HIGH);
       digitalWrite(_clk, LOW);
     }

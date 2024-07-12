@@ -35,6 +35,10 @@ void setup()
   Serial.print("Channels: ");
   Serial.println(tlc.channelCount());
 
+  //  set gain level
+  tlc.setSpecialMode();
+  tlc.writeConfiguration(255);
+    
   //  set all leds ON
   tlc.setNormalMode();
   tlc.enable();
@@ -46,46 +50,44 @@ void setup()
   tlc.write();
   delay(1000);
 
-  Serial.println("takes ~26 seconds");
   Serial.print("MODE:\t");
   Serial.println(tlc.getMode());
   tlc.setSpecialMode();
   Serial.print("MODE:\t");
   Serial.println(tlc.getMode());
+
   uint32_t start = millis();
   for (int conf = 0; conf < 256; conf++)
   {
     tlc.writeConfiguration(conf);
-    delay(10);
   }
   uint32_t stop = millis();
-  tlc.setNormalMode();
+
   Serial.print("TIME:\t");
   Serial.println(stop - start);
   Serial.print("MODE:\t");
   Serial.println(tlc.getMode());
 
-  Serial.println("\ndone...");
+  Serial.println("25%");
+  tlc.writeConfiguration(0);  //  very low.
+  tlc.setNormalMode();
+  tlc.write();
+  tlc.enable();
+  delay(3000);
 
   tlc.setSpecialMode();
+  tlc.writeConfiguration(255);  //  MAX!
+  tlc.setNormalMode();
+  tlc.write();
+  tlc.enable();
+  delay(3000);
+
+  Serial.println("\ndone...");
 }
 
 
 void loop()
 {
-  //  increase gain
-  for (int conf = 0; conf < 256; conf++)
-  {
-    tlc.writeConfiguration(conf);
-    delay(10);
-  }
-  // decrease gain
-  for (int conf = 255; conf > 0; conf--)
-  {
-    tlc.writeConfiguration(conf);
-    delay(10);
-  }
-
 }
 
 

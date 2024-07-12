@@ -137,8 +137,10 @@ to be set again.
 
 See datasheet page 23 for details.
 
-- **void setNormalMode()**  to send the data for the LEDS.
-- **void setSpecialMode()**  to configure the gain.
+- **void setNormalMode()** to send the data for the LEDS.
+- **void setSpecialMode()** to configure the gain.
+Not that calling **setSpecialMode()** disables the output and one should enable 
+it again.
 
 
 The special mode needs to be set for the following functions:
