@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - fix allocation buffer for channels.
 - update performance sketch
 - rename blank to **outputEnable**
-
+- update readme.md
 
 ----
 
