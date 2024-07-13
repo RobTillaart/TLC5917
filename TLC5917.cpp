@@ -108,11 +108,10 @@ void TLC5917::write()
 }
 
 
-void TLC5917::write(int channelCount)
+void TLC5917::write(int channels)
 {
-  if (channelCount > _channelCount) channelCount = _channelCount;
-  if (channelCount < 0) return;
-  int devices = channelCount / 8;
+  if (channels < 0) return;
+  int devices = (channels > _channelCount) ? _channelCount / 8 : channels / 8;
 
 
 #if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_MEGAAVR)

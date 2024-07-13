@@ -42,7 +42,8 @@ public:
   //  LE = Latch Enable
   //  OE = Output Enable
   TLC5917(uint8_t clock, uint8_t data, uint8_t LE, uint8_t OE);
-  //  multi device constructor - for daisy chaining)
+  //  multi device constructor 
+  //  - for daisy chaining
   TLC5917(int deviceCount, uint8_t clock, uint8_t data, uint8_t LE, uint8_t OE);
   virtual ~TLC5917();
 
@@ -56,8 +57,8 @@ public:
   bool     setAll(bool on);
   bool     getChannel(uint8_t channel);
 
-  //       write the buffer to the TLC5917 device(s).
-  void     write(int n);
+  //       write the internal buffer to the TLC5917 device(s).
+  void     write(int channels);
   void     write();
 
   //       control the outputEnable (OE) line.

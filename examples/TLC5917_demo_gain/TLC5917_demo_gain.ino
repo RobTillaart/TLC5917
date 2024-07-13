@@ -71,14 +71,12 @@ void setup()
   Serial.println("25%");
   tlc.writeConfiguration(0);  //  very low.
   tlc.setNormalMode();
-  tlc.write();
   tlc.enable();
   delay(3000);
 
   tlc.setSpecialMode();
   tlc.writeConfiguration(255);  //  MAX!
   tlc.setNormalMode();
-  tlc.write();
   tlc.enable();
   delay(3000);
 
