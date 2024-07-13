@@ -7,11 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
 ## [0.2.0] - 2024-07-12
-- fix deviceCount in **write()**
-- fix allocation buffer for channels.
-- update performance sketch
-- rename blank to **outputEnable**
-- update readme.md
+- fix deviceCount in **write()**.
+- fix allocation buffer for channels in constructor.
+- update performance sketch.
+- add demo_setChannel sketch (array param).
+- rename blank to **outputEnable**.
+- update readme.md.
+- minor edits.
 
 ----
 
