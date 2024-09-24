@@ -262,6 +262,7 @@ uint8_t TLC5917::getMode()
 
 
 //  9.4.3 Writing Configuration Code in Special Mode
+//  no AVR optimized version as fucntion is not often used (assumption).
 void TLC5917::writeConfiguration(uint8_t configuration)
 {
   uint8_t _clk = _clock;

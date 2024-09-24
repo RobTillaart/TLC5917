@@ -16,7 +16,7 @@ Done...
 
 
 (default write() on UNO for reference)
-TLC5917_LIB_VERSION: 	0.1.3
+TLC5917_LIB_VERSION: 	0.2.0
 
 Channels:		800
 SETCHANNEL TRUE:	2572

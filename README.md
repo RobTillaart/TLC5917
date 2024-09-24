@@ -11,7 +11,7 @@
 
 # TLC5917
 
-TLC5917 is an Arduino library for TLC5917 8-Channel Constant-Current LED Sink Drivers.
+Arduino library for TLC5917 8-Channel Constant-Current LED Sink Drivers.
 
 
 ## Description
@@ -24,19 +24,20 @@ This library also support more than one device in a daisy chain (see below).
 The library allows to set the channels (outputs) on/off individually or as a group in one call.
 Furthermore it allows to set a current gain for all devices connected.
 
-The **TLC5916** is a derived class that is functional identical to the TLC5917.
+The **TLC5916** is a derived class that is functional identical to the **TLC5917**.
 When implementation proceeds this might change, the difference is in support for fetching 
-the status and error modi. This functionality is not supported by the library yet, 
-so there is no difference between the **TLC5916** and **TLC5917** for now. 
+the status and error modi. As this functionality is not supported by the library yet, 
+there is no difference between the **TLC5916** and **TLC5917** for now. 
 
 The library needs more testing with hardware.  
 Please share your experiences.
 
 (Changes of the interface are definitely possible).
 
+
 ### Schema
 
-Always check your datasheet!
+Always check the datasheet!
 
 ```
             TLC5917
@@ -56,8 +57,8 @@ Always check your datasheet!
 ### Breaking changes
 
 The 0.2.0 version fixed an internal storage bug which allocated way to much memory
-in version 0.1.x. So these versions can be considered obsolete.
-The performance of the library **write()** call improved a lot.
+in version 0.1.x. So the pre 0.2.0 versions can be considered obsolete.
+The performance of the **write()** call improved a lot.
 
 
 ### Daisy chaining
@@ -66,7 +67,7 @@ This library supports daisy chaining of multiple **TLC5917** modules.
 A constructor takes the number of devices as parameter and 
 an internal buffer is allocated (8 channels per device).
 This internal buffer is clocked into the devices with the **write()** call.
-So **setChannel()** calls can be changed until last moment.
+So **setChannel()** calls can change this buffer until last moment before **write()**
 
 
 ### Related
@@ -99,8 +100,8 @@ The outputEnable pin is explained in more detail below.
 
 ### Base
 
-- **bool begin()** set the pinMode of the pins used and their initial values.
-The TLC5917 is disabled by default, as the device has random values in its register. 
+- **bool begin()** sets the pinMode of the pins used and their initial values.
+The TLC5917 module is disabled by default, as the device has random values in its registers.
 Therefore one must call **enable()** explicitly.
 - **int channelCount()** return the amount of channels == 8 x number of devices.
 
@@ -114,14 +115,18 @@ Returns false if **channel** is out of range.
 - **bool setChannel(uint8_t \* array)** copy a preset of channel settings in one call.
 The user has to take care that the size of array holds the right amount of bytes.
 Typical amount is deviceCount (or more).
+Will always return true for now.
 - **bool setAll(bool on)** set all channels on or off.
+Will always return true for now.
 - **bool getChannel(uint8_t channel)** returns current state of a channel from the 
 cached buffer. This might differ from the actual device state if channels have been 
 changed without a **write()**.
+Returns false if **channel** is out of range.
+
 
 ### Write
 
-- **int write()** writes the whole buffer (deviceCount x 8 values) to the device(s).
+- **int write()** writes the whole internal buffer (deviceCount x 8 values) to the device(s).
 Returns the number of channels written (0 .. channelCount).
 - **int write(int channels)** writes a part of the internal buffer (only **channels** values) 
 to the device.
@@ -137,7 +142,7 @@ channels as fast as possible.
 See also **TLC5917_performance.ino** for an indication of time needed.
 
 
-### OutputEnable line
+### OutputEnable
  
 The **outputEnable** pin (OE or blank) is used to set all channels on or off.
 This allows to "preload" the registers with values and enable them all at once
@@ -158,7 +163,7 @@ The outputEnable parameter in the constructor should be set to -1 (out of range 
 
 #### PWM
 
-It might be possible to use a PWM pin on the **outputEnable** line to dim the LEDS.
+It might be possible to use a PWM signal on the **outputEnable** pin to dim the LEDS.
 This is neither tested nor supported by the library.
 Note that writing to the TLC5917 needs a HIGH **outputEnable** so the PWM value needs 
 to be set again after each **write()**.
@@ -172,7 +177,7 @@ See datasheet page 23 for details.
 - **void setSpecialMode()** switch to special mode to configure the gain.
 
 Note that calling **setSpecialMode()** and **setNormalMode()** disables the output.
-So one should enable it again if one wants to.
+So one should **enable()** the output again if one wants to.
 
 
 The special mode needs to be set for the following functions:
@@ -260,7 +265,7 @@ This of course includes the **gain** functions that use these.
 To solve this one still has to provide the CLOCK, LATCH and OUTPUT ENABLE pins.
 Especially the CLOCK pin is part of the SPI pins, and it would depend on the 
 board and optional number of HW SPI ports of the board.
-To prevent this complexity the library does not have a hardware SPI constructor. 
+To prevent this complexity the library does not have a hardware SPI constructor.
 
 It looks like it is possible to create a simplified class (stripped version) 
 without the gain control that might work well with HW SPI for many application. 
@@ -282,6 +287,10 @@ The added value is however limited as the (optimized) SW is pretty fast already.
 - now the CurrentGain is set to the same value for all devices.
   - needs array, one value (uint8_t) per device, investigate.
 - investigate device count and channels unsigned int?
+- use channel count in constructor, might be more correct as device count
+  as one could use e.g. 21 channels explicitly. Would prevent overflows
+  better. Impact on code?
+- need to write section about latch enable LE line?
 
 #### Could
 
