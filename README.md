@@ -34,6 +34,24 @@ Please share your experiences.
 
 (Changes of the interface are definitely possible).
 
+### Schema
+
+Always check your datasheet!
+
+```
+            TLC5917
+          +----u----+
+    GND   | 1    16 |  VDD
+    SDI   | 2    15 |  R-EXT
+    CLK   | 3    14 |  SDO
+    LE    | 4    13 |  OE
+    OUT0  | 5    12 |  OUT7
+    OUT1  | 6    11 |  OUT6
+    OUT2  | 7    10 |  OUT5
+    OUT3  | 8    09 |  OUT4
+          +---------+
+```
+
 
 ### Breaking changes
 
@@ -70,7 +88,7 @@ So **setChannel()** calls can be changed until last moment.
 ### Constructor
 
 - **TLC5917(uint8_t clock, uint8_t data, uint8_t latch, uint8_t outputEnable)** constructor.
-Single device constructor.
+Single device constructor, latch = LE pin, outputEnable = OE pin (see above).
 Defines the pins used for uploading / writing the data to the device.
 The outputEnable pin is explained in more detail below. 
 - **TLC5917(int deviceCount, uint8_t clock, uint8_t data, uint8_t latch, uint8_t outputEnable)** constructor.
@@ -92,16 +110,25 @@ Therefore one must call **enable()** explicitly.
 - **bool setChannel(uint8_t channel, bool on)** set a channel on or off in the 
 internal buffer. The value is not written immediately to the device(s).
 One has to call **write()** for that.
+Returns false if **channel** is out of range.
 - **bool setChannel(uint8_t \* array)** copy a preset of channel settings in one call.
 The user has to take care that the size of array holds the right amount of bytes.
 Typical amount is deviceCount (or more).
 - **bool setAll(bool on)** set all channels on or off.
-- **bool getChannel(uint8_t channel)** get current state of a channel from the cached buffer.
-- **void write()** writes the whole buffer (deviceCount x 8 values) to the device(s).
-- **void write(int channels)** writes a part of the internal buffer (only **channels** values) to the device.
+- **bool getChannel(uint8_t channel)** returns current state of a channel from the 
+cached buffer. This might differ from the actual device state if channels have been 
+changed without a **write()**.
+
+### Write
+
+- **int write()** writes the whole buffer (deviceCount x 8 values) to the device(s).
+Returns the number of channels written (0 .. channelCount).
+- **int write(int channels)** writes a part of the internal buffer (only **channels** values) 
+to the device.
 Typical used to speed up if less than max number e.g. only 17 channels are used
-and needs to be updated.  
+and needs to be updated.
 **experimental, might have side effects**
+Returns the number of channels written (0 .. channelCount).
 
 
 **write()** must be called after setting all values one wants to change.
@@ -121,19 +148,20 @@ Default a TLC device is disabled, by **begin()**, so one should enable it "manua
 
 - **void enable()** all channels reflect last values written.
 - **void disable()** all channels are off / 0.
-- **bool isEnabled()** returns status of outputEnable line.
+- **bool isEnabled()** returns status of outputEnable **OE** line.
 
 The library only supports one **enable() line**. 
 If you want a separate **enable()** per device you might need to connect the devices
 "in parallel" instead of "in series" (daisy chained).
 The outputEnable parameter in the constructor should be set to -1 (out of range value).
 
+
 #### PWM
 
 It might be possible to use a PWM pin on the **outputEnable** line to dim the LEDS.
 This is neither tested nor supported by the library.
 Note that writing to the TLC5917 needs a HIGH **outputEnable** so the PWM value needs 
-to be set again.
+to be set again after each **write()**.
 
 
 ### Configure gain
@@ -161,14 +189,15 @@ Over the range 0.250 - 2.989 the max error is 0.0124
 Over the range 2.989 - 3.000 the max error goes up to 0.023  
 So except for end of the range the error is (IMHO) small.
 Returns false if out of range (n < 0.250 or n > 3.0).  
-- **float getVoltageGain()** see below (from cache).
-- **float getCurrentGain()** see below (from cache).
+- **float getVoltageGain()** see below (returns value from cache).
+- **float getCurrentGain()** see below (returns value from cache).
 
 
 |      bit  |  0  |  1  |  2  |  3  |  4  |  5  |  6  |  7  |
 |:---------:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 |  abbrev   |  CM |  HC | CC0 | CC1 | CC2 | CC3 | CC4 | CC5 |
 |  default  |  1  |  1  |  1  |  1  |  1  |  1  |  1  |  1  |
+
 
 CM == Current Multiplier
 - limits the output current range.  
@@ -199,6 +228,7 @@ and issue #9 for the LGT8F328 data
 
 Timing in microseconds, 800 channels = 100 devices.
 
+
 | Version | Function         | UNO 1.8.19 | LGT8F328 |   other  |
 |:-------:|:-----------------|:----------:|:--------:|:--------:|
 |  0.2.0  | SETCHANNEL TRUE  |    2572    |   1152   |
@@ -207,8 +237,13 @@ Timing in microseconds, 800 channels = 100 devices.
 |  0.2.0  | SETALL FALSE     |     232    |      -   |
 |  0.2.0  | WRITE optimized  |    1772    |      -   |
 |  0.2.0  | WRITE normal     |    9420    |      -   |
+|  0.2.1  | WRITE optimized  |    1832    |      -   |
+|  0.2.1  | WRITE normal     |    9484    |      -   |
+
 
 _The "WRITE optimized" is AVR only._
+
+The 0.2.1 is slightly slower (~3%), probably due to added return values.
 
 So setting and writing 8 channels (e.g. a single 7 segment display) takes 
 28.40 + 17.72 = 46.12 < 50 microseconds. 
@@ -221,6 +256,7 @@ First investigations show that **write()** could be a hardware SPI transaction.
 However the **setNormalMode()**, **setSpecialMode()** and especially the 
 **writeConfiguration()** function are no standard 8 bit SPI transactions.
 This of course includes the **gain** functions that use these.
+
 To solve this one still has to provide the CLOCK, LATCH and OUTPUT ENABLE pins.
 Especially the CLOCK pin is part of the SPI pins, and it would depend on the 
 board and optional number of HW SPI ports of the board.
@@ -245,6 +281,7 @@ The added value is however limited as the (optimized) SW is pretty fast already.
   - what is clock in practice (e.g. an ESP32 240 MHz)
 - now the CurrentGain is set to the same value for all devices.
   - needs array, one value (uint8_t) per device, investigate.
+- investigate device count and channels unsigned int?
 
 #### Could
 
@@ -252,6 +289,10 @@ The added value is however limited as the (optimized) SW is pretty fast already.
 - reading error codes from SDO
 - do brightness test with analogWrite(OE, value);
   - it would be mandatory to have OE be a PWM pin.
+- return values for enable/disable?
+- track "dirty cache", e.g. changed channels are not written yet.
+  - e.g. **bool writePending()**
+  - user can track this quite easily.
 
 #### Wont (unless needed)
 
@@ -260,7 +301,7 @@ The added value is however limited as the (optimized) SW is pretty fast already.
 - **void getChannel(uint8_t \* array)** fill an array with current data.
 - error handling in special mode
   - over-temperature, open-load, short to GND, short to VLED (TLC5917 only).
-- implement hardware SPI, see above.
+- implement hardware SPI simplified class, see section above.
 
 
 ## Support
